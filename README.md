@@ -63,25 +63,87 @@ python main.py
 
 ### Step 1: Install Nmap
 
-#### Windows:
+#### 🪟 Windows:
 ```powershell
-# Using winget (recommended)
+# Method 1: Using winget (recommended)
 winget install Insecure.Nmap
 
-# Or download from https://nmap.org/download.html
+# Method 2: Using Chocolatey
+choco install nmap
+
+# Method 3: Manual download
+# Download from https://nmap.org/download.html
 ```
 
-#### Linux (Ubuntu/Debian):
+#### 🐧 Linux:
+
+##### Ubuntu/Debian:
 ```bash
 sudo apt update
-sudo apt install nmap
+sudo apt install nmap python3 python3-pip
 ```
 
-#### macOS:
+##### CentOS/RHEL/Fedora:
 ```bash
-# Using Homebrew
-brew install nmap
+# CentOS/RHEL 7
+sudo yum install nmap python3 python3-pip
+
+# CentOS/RHEL 8+ and Fedora
+sudo dnf install nmap python3 python3-pip
 ```
+
+##### Arch Linux:
+```bash
+sudo pacman -S nmap python python-pip
+```
+
+##### Alpine Linux:
+```bash
+sudo apk add nmap python3 py3-pip
+```
+
+##### openSUSE:
+```bash
+sudo zypper install nmap python3 python3-pip
+```
+
+#### 🍎 macOS:
+```bash
+# Using Homebrew (recommended)
+brew install nmap python3
+
+# Using MacPorts
+sudo port install nmap python39
+```
+
+#### 🤖 Android (via Termux):
+
+**Note**: This runs in terminal mode only, no GUI support.
+
+1. **Install Termux** from [F-Droid](https://f-droid.org/packages/com.termux/) or Google Play Store
+2. **Setup Termux environment**:
+```bash
+# Update packages
+pkg update && pkg upgrade
+
+# Install required packages
+pkg install nmap python git
+
+# Install pip
+pkg install python-pip
+```
+
+3. **Clone and setup the scanner**:
+```bash
+# Clone the repository
+git clone https://github.com/mdnoyon9758/Nmap_Scaner.git
+cd Nmap_Scaner
+
+# Install Python dependencies (GUI components will be skipped)
+pip install python-nmap
+```
+
+4. **Create a command-line version** (see Android Usage section below)
 
 ### Step 2: Install Dependencies (Source version only)
 ```bash
@@ -122,6 +184,177 @@ pip install customtkinter==5.2.2 pillow==10.0.1 python-nmap==0.7.1
 - Use **Ping Scan** to check if hosts are alive
 - Use **Service Detection** to identify running services
 - Combine with port ranges for targeted scanning
+
+## 🖥️ Platform-Specific Usage
+
+### 🪟 Windows Usage
+
+#### Running the GUI:
+```cmd
+# Method 1: Using the executable
+Nmap-Scanner-GUI.exe
+
+# Method 2: From source
+cd Nmap_Scaner
+python main.py
+```
+
+#### Windows-specific features:
+- 📁 **Portable**: The executable runs without installation
+- 🎨 **Native look**: Integrates with Windows themes
+- 🔐 **UAC support**: Prompts for admin rights when needed
+
+### 🐧 Linux Usage
+
+#### GUI Version:
+```bash
+# Install display server (if using headless system)
+sudo apt install xvfb  # Ubuntu/Debian
+
+# Run with GUI
+python3 main.py
+
+# Run headless (X11 forwarding for SSH)
+ssh -X user@server
+python3 main.py
+```
+
+#### Command-line Version:
+```bash
+# Direct nmap usage (examples)
+nmap -T4 -F 192.168.1.1              # Quick scan
+nmap -T4 -A -v 192.168.1.1           # Intense scan
+nmap -sn 192.168.1.0/24              # Ping scan
+nmap -sS -p 1-1000 192.168.1.1       # Port scan
+nmap -sV 192.168.1.1                 # Service detection
+```
+
+#### Linux-specific features:
+- 🔒 **Sudo integration**: Automatic privilege escalation prompts
+- 📊 **Performance**: Optimized for Linux networking stack
+- 🔧 **Customization**: Easy to modify for specific distros
+
+### 🍎 macOS Usage
+
+#### GUI Version:
+```bash
+# Install using Homebrew
+brew install python-tk  # For tkinter support
+
+# Run the application
+python3 main.py
+```
+
+#### macOS-specific considerations:
+- 🔐 **Gatekeeper**: May need to allow app in Security & Privacy
+- 🖥️ **Retina support**: GUI scales properly on high-DPI displays
+- 🎨 **Native theming**: Adapts to macOS light/dark mode
+
+### 🤖 Android Usage (Termux)
+
+**Note**: Android version runs in command-line mode only.
+
+#### Setup and Usage:
+```bash
+# After installing Termux and cloning the repo
+cd Nmap_Scaner
+
+# Create a simple CLI wrapper
+cat > nmap_cli.py << 'EOF'
+#!/usr/bin/env python3
+import sys
+from scanner.nmap_wrapper import NmapScanner
+from scanner.parser import NmapParser
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python3 nmap_cli.py <target> [scan_type] [port_range]")
+        print("Scan types: 'Quick Scan', 'Intense Scan', 'Ping Scan', 'Port Scan', 'Service Detection'")
+        return
+    
+    target = sys.argv[1]
+    scan_type = sys.argv[2] if len(sys.argv) > 2 else "Quick Scan"
+    port_range = sys.argv[3] if len(sys.argv) > 3 else None
+    
+    scanner = NmapScanner()
+    parser = NmapParser()
+    
+    print(f"\n🔍 Starting {scan_type} of {target}...")
+    results = scanner.scan(target, scan_type, port_range)
+    formatted_results = parser.format_results(results, target, scan_type)
+    print(formatted_results)
+
+if __name__ == "__main__":
+    main()
+EOF
+
+# Make it executable
+chmod +x nmap_cli.py
+
+# Usage examples
+python3 nmap_cli.py 192.168.1.1                    # Quick scan
+python3 nmap_cli.py 192.168.1.1 "Intense Scan"      # Intensive scan
+python3 nmap_cli.py 192.168.1.1 "Port Scan" "1-1000" # Port range scan
+```
+
+#### Android-specific features:
+- 📱 **Mobile-optimized**: Designed for touch interfaces
+- 🔋 **Battery-aware**: Efficient scanning to preserve battery
+- 📶 **Network-aware**: Adapts to mobile vs WiFi connections
+- 🔒 **Root detection**: Enhanced features when device is rooted
+
+#### Android Limitations:
+- ❌ **No GUI**: Terminal interface only
+- ⚠️ **Limited permissions**: Some scan types require root
+- 🔋 **Battery drain**: Intensive scans can drain battery quickly
+- 📱 **Screen space**: Limited terminal real estate
+
+## 🔧 Troubleshooting
+
+### Common Issues:
+
+#### "Nmap not found" error:
+```bash
+# Verify nmap installation
+nmap --version
+
+# Add to PATH if needed (Linux/macOS)
+export PATH=$PATH:/usr/local/bin
+
+# Windows: Add nmap directory to system PATH
+```
+
+#### Permission denied (Linux/macOS):
+```bash
+# Run with sudo for privileged scans
+sudo python3 main.py
+
+# Or add user to netdev group (Ubuntu)
+sudo usermod -a -G netdev $USER
+```
+
+#### GUI not displaying (Linux):
+```bash
+# Install tkinter
+sudo apt install python3-tk  # Ubuntu/Debian
+sudo yum install tkinter      # CentOS/RHEL
+
+# Set DISPLAY variable for SSH
+export DISPLAY=:0.0
+```
+
+#### Dependencies issues:
+```bash
+# Upgrade pip and reinstall
+pip install --upgrade pip
+pip install --force-reinstall -r requirements.txt
+
+# Virtual environment (recommended)
+python3 -m venv nmap_env
+source nmap_env/bin/activate  # Linux/macOS
+nmap_env\Scripts\activate     # Windows
+pip install -r requirements.txt
+```
 
 ## ⚠️ Legal Disclaimer
 
