@@ -248,6 +248,26 @@ class NmapGui(ctk.CTk):
         self.results_textbox.delete(1.0, tk.END)
         self.status_label.configure(text="Results cleared")
 
+def _has_display() -> bool:
+    """The GUI needs a windowing system. Headless shells (CI, containers,
+    GitHub Codespaces, SSH without X forwarding) have none."""
+    if sys.platform.startswith("win") or sys.platform == "darwin":
+        return True
+    return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+
+
 if __name__ == "__main__":
+    if not _has_display():
+        print(
+            "\n[!] No graphical display detected — the GUI (main.py) needs a\n"
+            "    desktop and cannot run in a headless environment such as a\n"
+            "    GitHub Codespace, container, or SSH session without X.\n\n"
+            "    Use the ReconX command-line toolkit instead — it runs fully\n"
+            "    in the terminal with no display and no dependencies:\n\n"
+            "      python3 recon.py --list\n"
+            "      python3 recon.py <target> --profile recon --i-am-authorized\n",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     app = NmapGui()
     app.mainloop()
