@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reconx"
+version = "2.0.0"
+description = "Self-contained, cross-platform recon & security assessment toolkit for authorized testing"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "mdnoyon9758" }]
+keywords = ["security", "recon", "pentest", "bug-bounty", "nmap", "scanner"]
+
+# Core toolkit is pure standard library — no required dependencies.
+dependencies = []
+
+[project.optional-dependencies]
+# Optional: richer nmap integration and the desktop GUI.
+nmap = ["python-nmap==0.7.1"]
+gui = ["customtkinter==5.2.2", "pillow>=10.0.1"]
+all = ["python-nmap==0.7.1", "customtkinter==5.2.2", "pillow>=10.0.1"]
+
+[project.scripts]
+reconx = "reconx.cli:main"
+
+[tool.setuptools]
+packages = ["reconx", "reconx.core", "reconx.modules"]
+py-modules = ["recon"]
