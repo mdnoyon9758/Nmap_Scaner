@@ -142,3 +142,6 @@ dmypy.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Build artifacts (publish via GitHub Releases, not git)
+dist/
