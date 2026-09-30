@@ -8,6 +8,99 @@
 
 A **modern, beautiful, and user-friendly GUI application** for network scanning using Nmap. Perfect for penetration testers, network administrators, and cybersecurity professionals.
 
+---
+
+# 🛡️ ReconX — Combined Security Assessment Toolkit (v2.0)
+
+This project now ships **ReconX**, a self-contained, cross-platform
+reconnaissance and security-assessment toolkit built for authorized
+penetration testing and **bug-bounty** work. It runs anywhere Python runs
+— Windows, macOS, Linux, and Android/Termux — **with zero required
+dependencies** (pure standard library) and **without needing a separate
+Linux box or external binaries**. Nmap is used automatically when present,
+but is optional.
+
+> ⚠️ **Authorized use only.** ReconX will not run until you confirm you
+> have permission to test the target scope (via `--i-am-authorized`, the
+> `RECONX_AUTHORIZED=1` env var, or an interactive prompt). Every run is
+> written to an audit log at `~/.reconx/audit.log`. Only scan systems you
+> own or are explicitly authorized to test (a signed engagement or an
+> in-scope bug-bounty program). See [SECURITY.md](SECURITY.md).
+
+## What it does
+
+One command consolidates the common recon/enumeration tasks:
+
+| Module | What it gathers |
+| ------ | --------------- |
+| `portscan` | TCP connect port scan + banner grab (no nmap needed) |
+| `nmap` | Deep service/version/OS scan **when nmap is installed** |
+| `dns` | A/AAAA/NS/MX/TXT/CNAME/SOA records + SPF/DMARC posture |
+| `subdomains` | Subdomain discovery via Certificate Transparency (crt.sh) + DNS wordlist |
+| `whois` | Domain/IP registration data over the WHOIS protocol |
+| `headers` | HTTP security-header analysis (HSTS, CSP, etc.) |
+| `tls` | TLS certificate + protocol inspection (expiry, weak protocols) |
+| `tech` | Passive web technology fingerprinting |
+| `web` | robots/sitemap/security.txt + exposed sensitive-path checks (`.git`, `.env`, …) |
+
+Findings are collected into one report you can export as **text**, **JSON**
+(for pipelines/CI), or a self-contained **HTML** report to hand to a client.
+
+## Quick start
+
+```bash
+# No install needed — run straight from the checkout:
+python3 recon.py example.com --profile recon --i-am-authorized
+
+# Port scan an IP (no nmap required):
+python3 recon.py 203.0.113.10 --modules portscan --ports top --i-am-authorized
+
+# Full assessment of a web app, HTML report, polite rate limit:
+python3 recon.py https://example.com --profile full \
+        --rate 5 --format html --output report.html --i-am-authorized
+
+# List every module and profile:
+python3 recon.py --list
+```
+
+Or install it as a `reconx` command:
+
+```bash
+pip install -e .
+reconx example.com --profile recon --i-am-authorized
+```
+
+## Profiles
+
+| Profile | Modules |
+| ------- | ------- |
+| `quick` | portscan, headers |
+| `recon` | dns, subdomains, whois, headers, tech, tls |
+| `web`   | headers, tech, tls, web |
+| `full`  | dns, subdomains, whois, portscan, headers, tech, tls, web |
+
+## Handy flags
+
+- `--modules/-m` — pick specific modules or profiles (or `all`)
+- `--ports` — `top` | `all` | `22,80,443` | `1-1024`
+- `--rate N` — cap operations/sec (be a good citizen)
+- `--threads/-t` — concurrency (default 50)
+- `--wordlist FILE` — custom subdomain wordlist
+- `--format text|json|html` and `--output FILE`
+- CIDR ranges (e.g. `192.168.1.0/24`) are expanded automatically (capped at 65536 hosts)
+
+## Design & safety notes
+
+- **Pure stdlib core** — the toolkit works with no `pip install` at all.
+- **Scoped by design** — no mass-targeting, DoS, or exploitation payloads;
+  ReconX focuses on the reconnaissance and assessment that legitimate
+  bug-bounty and pentest engagements rely on.
+- **Graceful degradation** — a blocked host or missing nmap produces a
+  clear finding, never a crash.
+- Tests: `python3 -m unittest discover -s tests`
+
+---
+
 ## 🌟 Why Choose This Nmap GUI?
 
 - 🎨 **Beautiful Modern Interface** - Dark theme with smooth animations
